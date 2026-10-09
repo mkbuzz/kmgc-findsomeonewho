@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8fafb">
+  <meta name="description" content="スマホで遊べる日英併記の Find Someone Who BINGO。36マスのランダムカードで交流しましょう。">
+  <title>Find Someone Who BINGO | KMGC</title>
+  <style>
+    :root { --paper:#f8fafb; --card:#ffffff; --ink:#172a36; --muted:#60717b; --accent:#185e7a; --accent-soft:#e8f3f8; --border:#dbe5e9; --done:#1c7458; --done-soft:#e9f6ef; --bingo:#cf8b13; --bingo-soft:#fff4d8; --text-zoom:1; }
+    * { box-sizing:border-box; }
+    html { -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+    body { margin:0; color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP","Yu Gothic",Meiryo,system-ui,sans-serif; background:var(--paper); line-height:1.45; }
+    button,input { font:inherit; }
+    button { -webkit-tap-highlight-color:transparent; cursor:pointer; }
+    button:focus-visible, input:focus-visible { outline:3px solid #42a4d2; outline-offset:3px; }
+    .wrap { max-width:650px; margin:0 auto; padding:0 14px 58px; }
+    .sticky { position:sticky; top:0; z-index:5; background:linear-gradient(var(--paper) 94%,rgba(248,250,251,.96)); padding:10px 0 8px; }
+    .board-card { background:var(--card); border:1px solid var(--border); border-radius:18px; box-shadow:0 3px 13px rgba(33,58,72,.055); padding:11px 12px 12px; }
+    .heading { display:flex; align-items:flex-start; justify-content:space-between; gap:9px; margin-bottom:6px; }
+    h1 { font-size:clamp(1.04rem,4.25vw,1.29rem); margin:0; line-height:1.2; letter-spacing:-.025em; }
+    .subtitle { font-size:.69rem; color:var(--muted); padding-top:4px; }
+    .small-btn { min-height:36px; border:1px solid var(--border); color:var(--accent); background:#fff; border-radius:10px; padding:5px 9px; font-size:.78rem; font-weight:650; white-space:nowrap; }
+    .small-btn:active,.zoom-btn:active { background:var(--accent-soft); }
+    .stats { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:5px; margin:8px 0 8px; font-size:.78rem; color:var(--muted); }
+    .stats strong { color:var(--ink); font-variant-numeric:tabular-nums; }
+    .bingo-counter { font-weight:700; color:#976012; }
+    .progress-track { height:5px; background:#edf2f4; border-radius:999px; overflow:hidden; margin-bottom:9px; }
+    .progress-bar { height:100%; width:0; background:var(--done); transition:width .25s; }
+    .board-table { width:100%; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:5px; }
+    .square { position:relative; display:flex; align-items:center; justify-content:center; min-height:44px; aspect-ratio:1.1; padding:2px; border-radius:9px; border:1.5px solid #d6e1e8; background:#f8fbfd; color:#23495d; font-size:clamp(.73rem,3.2vw,1.02rem); font-weight:750; font-variant-numeric:tabular-nums; transition:background .15s,border-color .15s; }
+    .square .mark { position:absolute; top:48%; left:50%; transform:translate(-50%,-50%) rotate(-7deg); font-size:clamp(1.3rem,6vw,2rem); line-height:1; color:#ca4245; font-family:Arial,sans-serif; text-shadow:0 0 2px #fff; font-weight:800; }
+    .square.completed { background:var(--done-soft); border-color:#7db49b; }
+    .square.completed .cell-id { position:absolute; top:4px; left:6px; font-size:.68em; opacity:.7; }
+    .square.winner { border-color:#d59b22; box-shadow:inset 0 0 0 2px #e7b449; background:var(--bingo-soft); }
+    .square:active { transform:scale(.97); }
+    .board-collapsed .board-table, .board-collapsed .board-help { display:none; }
+    .board-help { font-size:.71rem; color:var(--muted); text-align:center; margin:8px 0 0; }
+    .bingo-banner { background:var(--bingo-soft); border:1px solid #edca83; color:#764f0c; font-weight:700; padding:11px 14px; border-radius:12px; margin:12px 0; text-align:center; }
+    .hidden { display:none !important; }
+    .list-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:8px; margin:17px 1px 8px; }
+    h2 { font-size:1.05rem; margin:0; }
+    .list-caption { font-size:.76rem; color:var(--muted); margin:4px 0 0; }
+    .zoom { display:flex; align-items:center; gap:4px; flex-shrink:0; }
+    .zoom-btn { background:white; border:1px solid var(--border); min-width:39px; height:39px; border-radius:10px; color:var(--accent); font-size:1.35rem; line-height:1; font-weight:700; }
+    .zoom-btn:disabled { opacity:.35; cursor:not-allowed; }
+    .zoom-label { min-width:47px; text-align:center; font-size:.77rem; color:var(--ink); font-weight:750; font-variant-numeric:tabular-nums; }
+    .filter-row { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:9px; font-size:.79rem; color:var(--muted); }
+    .filter-control { display:inline-flex; align-items:center; gap:6px; min-height:36px; }
+    .filter-control input { width:17px; height:17px; accent-color:var(--accent); }
+    .description-list { display:flex; flex-direction:column; gap:7px; }
+    .description { width:100%; display:flex; text-align:left; align-items:center; gap:11px; padding:11px 11px; min-height:64px; background:white; border:1px solid var(--border); border-radius:12px; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.015); }
+    .description.completed { background:#f6fcf9; border-color:#c9e6d8; }
+    .description:active { background:var(--accent-soft); }
+    .desc-id { align-self:flex-start; flex:0 0 37px; text-align:center; background:var(--accent-soft); border-radius:7px; padding:6px 3px; color:#16536f; font-weight:800; font-size:.79rem; }
+    .description.completed .desc-id { background:var(--done-soft); color:var(--done); }
+    .desc-main { flex:1 1 0; min-width:0; }
+    .jp { font-size:calc(.93rem * var(--text-zoom)); font-weight:720; line-height:1.48; overflow-wrap:anywhere; }
+    .en { font-size:calc(.82rem * var(--text-zoom)); color:var(--muted); line-height:1.42; margin-top:3px; overflow-wrap:anywhere; }
+    .desc-suffix { flex:0 0 21px; text-align:center; color:#7c929e; font-size:1.15rem; }
+    .description.completed .desc-suffix { color:var(--done); }
+    .empty-state { background:white; border:1px solid var(--border); border-radius:12px; padding:20px; text-align:center; color:var(--muted); }
+    .footer-controls { border-top:1px solid var(--border); margin-top:24px; padding-top:16px; display:flex; align-items:center; gap:10px; justify-content:space-between; flex-wrap:wrap; }
+    .reset { min-height:44px; border:1px solid #b8c9d1; background:white; border-radius:11px; padding:9px 14px; color:#324f60; font-weight:700; }
+    .privacy { color:var(--muted); font-size:.75rem; max-width:330px; margin:0; }
+    .dialog { border:0; border-radius:18px; background:#fff; color:var(--ink); box-shadow:0 18px 60px rgba(20,46,59,.25); padding:0; width:min(calc(100vw - 22px),520px); max-height:min(88dvh,780px); overflow:auto; }
+    .dialog::backdrop { background:rgba(11,33,44,.58); }
+    .dialog-inner { padding:19px 19px max(20px,env(safe-area-inset-bottom)); }
+    .dialog-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .dialog-label { display:inline-flex; align-items:center; gap:8px; color:var(--accent); font-weight:800; font-size:1.08rem; }
+    .dialog-status { color:var(--done); font-size:.79rem; font-weight:750; }
+    .close { display:inline-flex; justify-content:center; align-items:center; width:43px; height:43px; border-radius:11px; border:1px solid var(--border); background:#fff; font-size:1.4rem; }
+    .modal-jp { font-size:calc(1.12rem * var(--text-zoom)); font-weight:750; margin:14px 0 5px; line-height:1.5; overflow-wrap:anywhere; }
+    .modal-en { font-size:calc(.98rem * var(--text-zoom)); color:var(--muted); margin:0 0 21px; line-height:1.48; overflow-wrap:anywhere; }
+    .name-label { display:block; font-size:calc(.88rem * var(--text-zoom)); font-weight:700; margin-bottom:6px; }
+    .name-input { width:100%; min-height:55px; border:1.5px solid #aebfc7; border-radius:11px; padding:12px; font-size:calc(1rem * var(--text-zoom)); background:#fff; }
+    .dialog-help { font-size:.77rem; color:var(--muted); margin:8px 0 0; }
+    .modal-buttons { display:flex; flex-direction:column; gap:9px; margin-top:18px; }
+    .primary { min-height:51px; background:#16617e; color:white; border:0; border-radius:11px; font-weight:750; font-size:1rem; padding:11px; }
+    .primary:disabled { background:#b2c2ca; cursor:not-allowed; }
+    .secondary { min-height:46px; background:white; color:var(--ink); border:1px solid var(--border); border-radius:11px; font-weight:650; padding:10px; }
+    .secondary.danger { color:#a13f43; border-color:#d9afb0; }
+    .toast { position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:30; background:#173f53; color:white; border-radius:10px; padding:11px 18px; box-shadow:0 8px 25px rgba(0,0,0,.22); text-align:center; width:max-content; max-width:calc(100vw - 34px); font-weight:700; }
+    .visually-hidden { position:absolute !important; width:1px !important; height:1px !important; padding:0 !important; margin:-1px !important; overflow:hidden !important; clip:rect(0,0,0,0) !important; white-space:nowrap !important; border:0 !important; }
+    @media (min-width:520px) { .wrap { padding-left:20px; padding-right:20px; } .square { min-height:52px; aspect-ratio:1.35; } .board-card { padding:14px 17px; } }
+    @media (max-width:370px) { .wrap { padding-left:9px; padding-right:9px; } .board-card { padding:9px; } .board-table { gap:4px; } .square { min-height:41px; } .description { gap:8px; padding:10px 8px; } .desc-id { flex-basis:34px; } .list-heading { align-items:flex-start; } .zoom-btn { min-width:36px; height:36px; } }
+    @media (prefers-reduced-motion:reduce) { *,*:before,*:after { transition:none !important; scroll-behavior:auto !important; } }
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <section class="sticky" aria-label="BINGO board">
+    <div class="board-card" id="board-card">
+      <div class="heading">
+        <div><h1>☆ Find Someone Who BINGO ☆</h1><div class="subtitle">該当する人を見つけて名前を記録しよう！</div></div>
+        <button class="small-btn" id="fold-board" type="button" aria-expanded="true" aria-controls="board-table">縮小 / Hide ▲</button>
+      </div>
+      <div class="stats">
+        <span>完了 / Completed: <strong id="completed-count">0 / 36</strong></span>
+        <span class="bingo-counter">BINGO: <strong id="bingo-count">0</strong></span>
+      </div>
+      <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="progress-bar"></div></div>
+      <div class="board-table" id="board-table" role="group" aria-label="6 by 6 BINGO grid"></div>
+      <p class="board-help">マスをタップして名前を入力 / Tap a square to enter a name</p>
+    </div>
+  </section>
+
+  <div class="bingo-banner hidden" id="bingo-banner" role="status">BINGO! 1列そろいました！ / You completed a line!</div>
+
+  <section aria-labelledby="list-title">
+    <div class="list-heading">
+      <div><h2 id="list-title">お題一覧 / Find someone who…</h2><p class="list-caption">お題をタップすると入力画面が開きます。</p></div>
+      <div class="zoom" role="group" aria-label="文字サイズ調整 Text size">
+        <button class="zoom-btn" id="zoom-out" type="button" aria-label="文字を小さくする / Decrease text size">−</button>
+        <output class="zoom-label" id="zoom-value" aria-live="polite">100%</output>
+        <button class="zoom-btn" id="zoom-in" type="button" aria-label="文字を大きくする / Increase text size">+</button>
+      </div>
+    </div>
+    <div class="filter-row"><label class="filter-control"><input type="checkbox" id="incomplete-only"> 未完了のみ表示 / Incomplete only</label><span id="list-count">36件</span></div>
+    <div class="description-list" id="description-list" aria-label="BINGO descriptions"></div>
+  </section>
+
+  <footer class="footer-controls">
+    <button class="reset" id="new-card" type="button">↻ 新しいカード / New card</button>
+    <p class="privacy">入力した名前とカードは、この端末のブラウザだけに保存されます。/ Your card and names stay in this browser.</p>
+  </footer>
+</main>
+
+<dialog class="dialog" id="entry-dialog" aria-labelledby="dialog-position">
+  <form class="dialog-inner" id="entry-form" method="dialog" novalidate>
+    <div class="dialog-head">
+      <div><span class="dialog-label" id="dialog-position">A1</span> <span class="dialog-status" id="dialog-status"></span></div>
+      <button class="close" type="button" id="close-dialog" aria-label="Close / 閉じる">×</button>
+    </div>
+    <div class="modal-jp" id="dialog-jp"></div>
+    <div class="modal-en" id="dialog-en" lang="en"></div>
+    <label class="name-label" for="name-input">名前 / Person's name</label>
+    <input class="name-input" id="name-input" type="text" maxlength="100" autocomplete="off" placeholder="名前を入力 / Enter a name" required>
+    <p class="dialog-help">名前を入力して完了にすると、マスに × がつきます。<br>Enter a name to mark the square with an X.</p>
+    <div class="modal-buttons">
+      <button class="primary" type="submit" id="save-entry" disabled>完了 / Mark with ×</button>
+      <button class="secondary danger hidden" id="undo-entry" type="button">× を外す / Unmark this square</button>
+    </div>
+  </form>
+</dialog>
+<div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+// Each pair is transcribed from corresponding first-page cells in the supplied Japanese and English PDFs.
+// The Fisher–Yates shuffle assigns the same paired Japanese/English item to one randomized cell.
+const prompts = [
+  {ja:'祝会でカレーを作ったことがある', en:'has made curry for a church celebration'},
+  {ja:'2000年以降誕生日', en:'was born in 2000 or later'},
+  {ja:'KMGC会員歴5年以内', en:'has been a KMGC member for five years or less'},
+  {ja:'廣橋先生から洗礼を受けた', en:'was baptized by Pastor Hirohashi'},
+  {ja:'大場長老の下の名前を言える', en:'can say Elder Oba’s first name'},
+  {ja:'千葉県出身', en:'is from Chiba Prefecture'},
+  {ja:'会堂整備奉仕者', en:'helps maintain/clean church facilities'},
+  {ja:'聖書箇所1章まるごと暗唱できる', en:'can recite an entire chapter of the Bible from memory'},
+  {ja:'今年マリーンズの試合を見に行った', en:'went to a Chiba Lotte Marines game this year'},
+  {ja:'祈祷会に毎週参加している', en:'attends the prayer meeting every week'},
+  {ja:'身長185cm以上', en:'is 185 cm tall or taller'},
+  {ja:'今年百瀬ジョザイア先生と会った', en:'met Pastor Josiah Momose this year'},
+  {ja:'今この場でできる特技を持っている', en:'has a special talent they can demonstrate right now'},
+  {ja:'3か国語以上話せる', en:'speaks three or more languages'},
+  {ja:'マーク先生から洗礼を受けた', en:'was baptized by Pastor Mark'},
+  {ja:'出身が日本またはカリフォルニア以外', en:'is from somewhere other than Japan or California'},
+  {ja:'昼食準備奉仕者', en:'prepares and serves lunch after worship services'},
+  {ja:'CS教師メンバー', en:'is a Sunday school teacher'},
+  {ja:'ペットを飼っている', en:'has a pet'},
+  {ja:'今月(10月)誕生日', en:'has a birthday this month (October)'},
+  {ja:'礼拝音響・配信奉仕者', en:'operates sound or live-streaming for worship services'},
+  {ja:'今日103室で礼拝を守った', en:'attended today’s worship service in Room 103'},
+  {ja:'聖書に関連する漢字が名前にある', en:'has a Bible-related kanji character in their name'},
+  {ja:'クリスチャン家庭3世代目以上', en:'is a third-generation Christian or beyond'},
+  {ja:'KMGC会員歴20年以上', en:'has been a KMGC member for 20 years or more'},
+  {ja:'今日104室で礼拝を守った', en:'attended today’s worship service in Room 104'},
+  {ja:'礼拝賛美奉仕者', en:'serves on the worship music team'},
+  {ja:'KMGCに二世代で通っている', en:'attends KMGC with 2 or more generations'},
+  {ja:'礼拝PPT作成・操作奉仕者', en:'prepares or operates worship service PPT slides'},
+  {ja:'1ヵ月以内に海外に滞在した', en:'has been abroad within the past month'},
+  {ja:'学生時代、何か熱中していたことがある', en:'had something you were really passionate about as a student'},
+  {ja:'いま特別に祈っている祈祷課題がある', en:'have a specific prayer request you are praying about now'},
+  {ja:'スマホに聖書・デボーションアプリが2つ以上入っている', en:'have two or more Bible/devotional apps on your phone'},
+  {ja:'コーヒーの淹れ方にこだわりがある', en:'are particular about how you make coffee'},
+  {ja:'教会学校の子どもの名前を10人以上言える', en:'can name 10 or more children in Sunday School'},
+  {ja:'フルネームが一番長い', en:'have the longest full name'}
+];
+const $=id=>document.getElementById(id);
+const KEY='kmgc-find-someone-bingo-v1';
+const ROWS=['A','B','C','D','E','F'];
+const ids=Array.from({length:36},(_,i)=>ROWS[Math.floor(i/6)]+(i%6+1));
+let state;
+let activeIndex=-1;
+let toastTimer=null;
+let storageAvailable=true;
+function shuffle() {
+  const arr=Array.from({length:36},(_,i)=>i);
+  for(let i=arr.length-1;i>0;i--) {
+    let j;
+    if(window.crypto && window.crypto.getRandomValues) {
+      const ceiling=Math.floor(4294967296/(i+1))*(i+1);
+      const x=new Uint32Array(1);
+      do { window.crypto.getRandomValues(x); } while(x[0]>=ceiling);
+      j=x[0]%(i+1);
+    } else { j=Math.floor(Math.random()*(i+1)); }
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+function freshState() {
+  return {version:1,order:shuffle(),entries:Array.from({length:36},()=>({name:'',done:false})),zoom:100,folded:false,incompleteOnly:false};
+}
+function validState(s) {
+  return s && s.version===1 && Array.isArray(s.order) && s.order.length===36 && new Set(s.order).size===36 && s.order.every(n=>Number.isInteger(n)&&n>=0&&n<36) && Array.isArray(s.entries) && s.entries.length===36 && s.entries.every(e=>e && typeof e.name==='string' && typeof e.done==='boolean');
+}
+function loadState() {
+  try {
+    const raw=localStorage.getItem(KEY);
+    if(raw) { const loaded=JSON.parse(raw); if(validState(loaded)) return loaded; }
+  } catch(e) { storageAvailable=false; }
+  return freshState();
+}
+function persist() {
+  try {localStorage.setItem(KEY,JSON.stringify(state));} catch(e) {storageAvailable=false;}
+}
+function winningLines() {
+  const lines=[];
+  for(let r=0;r<6;r++) lines.push(Array.from({length:6},(_,c)=>r*6+c));
+  for(let c=0;c<6;c++) lines.push(Array.from({length:6},(_,r)=>r*6+c));
+  lines.push([0,7,14,21,28,35],[5,10,15,20,25,30]);
+  return lines.filter(line=>line.every(i=>state.entries[i].done));
+}
+function findWinnerCells(lines) {return new Set(lines.flat());}
+function el(tag,cls,txt) {const node=document.createElement(tag); if(cls)node.className=cls; if(txt!==undefined)node.textContent=txt; return node;}
+function setZoom() {
+  state.zoom=Math.max(90,Math.min(180,Math.round((Number(state.zoom)||100)/10)*10));
+  document.documentElement.style.setProperty('--text-zoom',String(state.zoom/100));
+  $('zoom-value').textContent=state.zoom+'%';
+  $('zoom-out').disabled=state.zoom===90;
+  $('zoom-in').disabled=state.zoom===180;
+}
+function setFolded() {
+  $('board-card').classList.toggle('board-collapsed',!!state.folded);
+  $('fold-board').textContent=state.folded?'表示 / Show ▼':'縮小 / Hide ▲';
+  $('fold-board').setAttribute('aria-expanded',String(!state.folded));
+}
+function render() {
+  const lines=winningLines(), wins=findWinnerCells(lines), doneCount=state.entries.filter(e=>e.done).length;
+  $('completed-count').textContent=doneCount+' / 36';
+  $('bingo-count').textContent=String(lines.length);
+  $('progress-bar').style.width=(doneCount/36*100)+'%';
+  $('bingo-banner').classList.toggle('hidden',lines.length===0);
+  $('bingo-banner').textContent=lines.length===0?'':'BINGO! '+lines.length+'列そろいました！ / '+lines.length+' line'+(lines.length===1?'':'s')+' completed!';
+  const board=$('board-table');
+  board.replaceChildren();
+  ids.forEach((id,i)=>{
+    const entry=state.entries[i]; const prompt=prompts[state.order[i]];
+    const btn=el('button','square'+(entry.done?' completed':'')+(wins.has(i)?' winner':''));
+    btn.type='button'; btn.dataset.index=String(i); btn.setAttribute('aria-label',id+' '+prompt.ja+(entry.done?' 完了 Completed':' 未完了 Incomplete'));
+    btn.append(el('span','cell-id',id));
+    if(entry.done) btn.append(el('span','mark','×'));
+    board.append(btn);
+  });
+  const list=$('description-list');
+  list.replaceChildren();
+  let shown=0;
+  ids.forEach((id,i)=>{
+    const entry=state.entries[i];
+    if(state.incompleteOnly&&entry.done) return;
+    shown++;
+    const p=prompts[state.order[i]];
+    const btn=el('button','description'+(entry.done?' completed':''));
+    btn.type='button'; btn.dataset.index=String(i);
+    btn.setAttribute('aria-label',id+' '+p.ja+' / '+p.en+(entry.done?' Completed':''));
+    btn.append(el('span','desc-id',id));
+    const main=el('span','desc-main');
+    main.append(el('span','jp',p.ja));
+    const en=el('span','en',p.en); en.lang='en'; en.style.display='block'; main.append(en);
+    btn.append(main);
+    btn.append(el('span','desc-suffix',entry.done?'✓':'›'));
+    list.append(btn);
+  });
+  if(shown===0) list.append(el('div','empty-state','すべて完了しました！ / All 36 descriptions are complete.'));
+  $('list-count').textContent=shown+' / 36';
+  $('incomplete-only').checked=!!state.incompleteOnly;
+  setZoom(); setFolded();
+}
+function toast(text) {
+  const t=$('toast'); clearTimeout(toastTimer);t.textContent=text;t.classList.remove('hidden');
+  toastTimer=setTimeout(()=>t.classList.add('hidden'),2900);
+}
+function openEntry(i) {
+  activeIndex=i;
+  const p=prompts[state.order[i]], entry=state.entries[i];
+  $('dialog-position').textContent=ids[i];
+  $('dialog-jp').textContent=p.ja;
+  $('dialog-en').textContent=p.en;
+  $('dialog-status').textContent=entry.done?'✓ 完了 / Completed':'';
+  $('name-input').value=entry.name;
+  $('save-entry').textContent=entry.done?'名前を保存 / Save name':'完了 / Mark with ×';
+  $('undo-entry').classList.toggle('hidden',!entry.done);
+  updateSaveButton();
+  const d=$('entry-dialog');
+  if(typeof d.showModal==='function') d.showModal(); else d.setAttribute('open','');
+  // Do not force the keyboard open: visitors can read the full bilingual description first.
+  $('close-dialog').focus({preventScroll:true});
+}
+function closeEntry() {
+  const d=$('entry-dialog'); if(typeof d.close==='function') d.close(); else d.removeAttribute('open');
+  activeIndex=-1;
+}
+function updateSaveButton(){ $('save-entry').disabled=!$('name-input').value.trim(); }
+function saveEntry(ev) {
+  ev.preventDefault();
+  if(activeIndex<0) return;
+  const name=$('name-input').value.trim(); if(!name) return;
+  const priorBingos=winningLines().length;
+  state.entries[activeIndex]={name,done:true};
+  persist(); closeEntry(); render();
+  const currentBingos=winningLines().length;
+  if(currentBingos>priorBingos) toast('BINGO! おめでとうございます！ / Congratulations!');
+  else toast('保存しました / Saved');
+}
+function unmarkEntry() {
+  if(activeIndex<0) return;
+  const entry=state.entries[activeIndex];
+  entry.name=$('name-input').value.trim();
+  entry.done=false;
+  persist();closeEntry();render();toast('完了を取り消しました / Square unmarked');
+}
+state=loadState();
+if(!storageAvailable) toast('このブラウザでは保存できません / Saving is unavailable in this browser');
+render(); persist();
+$('board-table').addEventListener('click',event=>{ const btn=event.target.closest('button[data-index]'); if(btn)openEntry(Number(btn.dataset.index)); });
+$('description-list').addEventListener('click',event=>{ const btn=event.target.closest('button[data-index]'); if(btn)openEntry(Number(btn.dataset.index)); });
+$('fold-board').addEventListener('click',()=>{state.folded=!state.folded;persist();setFolded();});
+$('zoom-in').addEventListener('click',()=>{state.zoom=Math.min(180,state.zoom+10);persist();setZoom();});
+$('zoom-out').addEventListener('click',()=>{state.zoom=Math.max(90,state.zoom-10);persist();setZoom();});
+$('incomplete-only').addEventListener('change',event=>{state.incompleteOnly=event.target.checked;persist();render();});
+$('close-dialog').addEventListener('click',closeEntry);
+$('entry-dialog').addEventListener('click',event=>{if(event.target===$('entry-dialog'))closeEntry();});
+$('entry-dialog').addEventListener('close',()=>{activeIndex=-1;});
+$('name-input').addEventListener('input',updateSaveButton);
+$('entry-form').addEventListener('submit',saveEntry);
+$('undo-entry').addEventListener('click',unmarkEntry);
+$('new-card').addEventListener('click',()=>{
+  const answer=window.confirm('新しいランダムカードを作りますか？\n今の名前・チェックはすべて消えます。\n\nGenerate a new card? All current names and checks will be erased.');
+  if(!answer) return;
+  const zoom=state.zoom,folded=state.folded;
+  state=freshState();state.zoom=zoom;state.folded=folded;
+  persist();render();window.scrollTo({top:0,behavior:'smooth'});toast('新しいカードができました / New card generated');
+});
+</script>
+</body>
+</html>
