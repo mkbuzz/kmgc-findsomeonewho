@@ -124,6 +124,58 @@
     .toast.bingo-toast { background:#a1329d; color:white; border:0.125rem solid #ffc6f0; font-size:1.1rem; padding:0.875rem 1.375rem; }
     @media (min-width:520px) { .square { min-height:0; height:2.4375rem; aspect-ratio:auto; } .board-card { padding:0.5625rem 0.8125rem; } }
     @media (max-width:370px) { .square { min-height:0; height:2.0625rem; } }
+
+    /* Keep the zoom toolbar a fixed size and anchored to the right of its heading.
+       All other content continues to follow the user's selected root font zoom. */
+    .wrap { padding-left:14px; padding-right:14px; }
+    .list-heading {
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) 140px;
+      align-items:start;
+      column-gap:8px;
+    }
+    .list-heading > :first-child { min-width:0; }
+    .zoom {
+      width:140px;
+      min-width:140px;
+      height:42px;
+      justify-self:end;
+      align-self:start;
+      justify-content:flex-end;
+      gap:4px;
+      flex-wrap:nowrap;
+      font-size:16px;
+    }
+    .zoom-btn {
+      box-sizing:border-box;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 42px;
+      width:42px;
+      min-width:42px;
+      height:42px;
+      padding:0;
+      border-width:1px;
+      border-radius:10px;
+      font-size:22px;
+      line-height:1;
+    }
+    .zoom-label {
+      box-sizing:border-box;
+      flex:0 0 48px;
+      width:48px;
+      min-width:48px;
+      font-size:13px;
+      line-height:42px;
+      white-space:nowrap;
+    }
+    @media (max-width:370px) {
+      .wrap { padding-left:9px; padding-right:9px; }
+    }
+    @media (min-width:520px) {
+      .wrap { padding-left:20px; padding-right:20px; }
+    }
   </style>
 </head>
 <body>
